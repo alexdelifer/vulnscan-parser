@@ -517,71 +517,72 @@ class NessusParserXML(VsXmlParser):
         return hostnames
 
     def _parse_ciphers(self, finding):
-        ciphers = []
-        lines = finding.plugin_output.split('\n')
+        # ciphers = []
+        # lines = finding.plugin_output.split('\n')
 
-        read_ciphers = False
-        curr_proto = None
+        # read_ciphers = False
+        # curr_proto = None
 
-        space_chars = ' \t'
-        word = CharsNotIn(space_chars)
-        space = Word(space_chars, exact=1)
-        cipher_name = delimitedList(word, delim=space, combine=True)
-        # an alternative construction for 'name' could be:
-        # label = Combine(word + ZeroOrMore(space + word))
-        value = Word(alphanums + '-_()=/')
-        line_expr = cipher_name('name') + value('kx') + value('au') + value('enc') + value('mac') + \
-            ZeroOrMore(value('export')) + LineEnd().suppress()
+        # space_chars = ' \t'
+        # word = CharsNotIn(space_chars)
+        # space = Word(space_chars, exact=1)
+        # cipher_name = delimitedList(word, delim=space, combine=True)
+        # # an alternative construction for 'name' could be:
+        # # label = Combine(word + ZeroOrMore(space + word))
+        # value = Word(alphanums + '-_()=/')
+        # line_expr = cipher_name('name') + value('kx') + value('au') + value('enc') + value('mac') + \
+        #     ZeroOrMore(value('export')) + LineEnd().suppress()
 
-        # noinspection PyBroadException
-        try:
-            for line in lines:
-                if read_ciphers and line.startswith('    '):
-                    line_res = line_expr.parseString(line.lstrip(' '))
+        # # noinspection PyBroadException
+        # try:
+        #     for line in lines:
+        #         if read_ciphers and line.startswith('    '):
+        #             line_res = line_expr.parseString(line.lstrip(' '))
 
-                    cipher = NessusCipher()
-                    cipher.host = finding.host
-                    cipher.port = finding.port
-                    cipher.protocol = finding.protocol
-                    cipher.hostname = finding.hostname
-                    cipher.src_file = finding.src_file
-                    cipher.name = line_res.name
-                    # key size may be "None". Sample:
-                    # ['TLS-NULL-NULL-NULL', 'Kx=None', 'Au=None', 'Enc=None', 'Mac=None']
-                    if 'Enc=None' == line_res.enc:
-                        cipher.key_size = 0
-                    else:
-                        cipher.key_size = int(line_res.enc.partition('(')[-1].rpartition(')')[0])
-                    cipher.tls_protocol = curr_proto
+        #             cipher = NessusCipher()
+        #             cipher.host = finding.host
+        #             cipher.port = finding.port
+        #             cipher.protocol = finding.protocol
+        #             cipher.hostname = finding.hostname
+        #             cipher.src_file = finding.src_file
+        #             cipher.name = line_res.name
+        #             # key size may be "None". Sample:
+        #             # ['TLS-NULL-NULL-NULL', 'Kx=None', 'Au=None', 'Enc=None', 'Mac=None']
+        #             #print(line_res.enc)
+        #             if 'Enc=None' == line_res.enc or 'Auth' == line_res.enc:
+        #                 cipher.key_size = 0
+        #             else:
+        #                 cipher.key_size = int(line_res.enc.partition('(')[-1].rpartition(')')[0])
+        #             cipher.tls_protocol = curr_proto
 
-                    # fix naming
-                    if 'SSLv2' == cipher.tls_protocol:
-                        cipher.tls_protocol = 'SSLv2'
-                    elif 'SSLv3' == cipher.tls_protocol:
-                        cipher.tls_protocol = 'SSLv3'
-                    elif 'TLSv1' == cipher.tls_protocol:
-                        cipher.tls_protocol = 'TLSv1.0'
-                    elif 'TLSv11' == cipher.tls_protocol:
-                        cipher.tls_protocol = 'TLSv1.1'
-                    elif 'TLSv12' == cipher.tls_protocol:
-                        cipher.tls_protocol = 'TLSv1.2'
+        #             # fix naming
+        #             if 'SSLv2' == cipher.tls_protocol:
+        #                 cipher.tls_protocol = 'SSLv2'
+        #             elif 'SSLv3' == cipher.tls_protocol:
+        #                 cipher.tls_protocol = 'SSLv3'
+        #             elif 'TLSv1' == cipher.tls_protocol:
+        #                 cipher.tls_protocol = 'TLSv1.0'
+        #             elif 'TLSv11' == cipher.tls_protocol:
+        #                 cipher.tls_protocol = 'TLSv1.1'
+        #             elif 'TLSv12' == cipher.tls_protocol:
+        #                 cipher.tls_protocol = 'TLSv1.2'
 
-                    cipher.id = '{name}-{tls_proto}-{ip}-{proto}-{port}'.format(
-                        name=cipher.name, tls_proto=cipher.tls_protocol, ip=cipher.host.ip,
-                        proto=cipher.protocol, port=cipher.port)
+        #             cipher.id = '{name}-{tls_proto}-{ip}-{proto}-{port}'.format(
+        #                 name=cipher.name, tls_proto=cipher.tls_protocol, ip=cipher.host.ip,
+        #                 proto=cipher.protocol, port=cipher.port)
 
-                    ciphers.append(cipher)
+        #             ciphers.append(cipher)
 
-                if line.startswith('SSL Version : '):
-                    curr_proto = line.split(':')[1].strip(' ')
-                    read_ciphers = True
-                elif line.strip(' ').startswith('Unrecognized Ciphers'):
-                    read_ciphers = False
+        #         if line.startswith('SSL Version : '):
+        #             curr_proto = line.split(':')[1].strip(' ')
+        #             read_ciphers = True
+        #         elif line.strip(' ').startswith('Unrecognized Ciphers'):
+        #             read_ciphers = False
 
-        except Exception:
-            LOGGER.exception('Error while parsing ciphers')
+        # except Exception:
+        #     LOGGER.exception('Error while parsing ciphers')
 
-        return ciphers
+        return []
 
     # def normalize_base_sw_name(self, name):
     #     # TODO: does normalizing make sense here?
